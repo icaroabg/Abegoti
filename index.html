@@ -159,8 +159,9 @@
     const timer = document.querySelector('.timer');
     const grid = document.querySelector('.grid');
 
-    const elements = ['sodio', 'hidrogenio', 'ouro', 'ferro', 'cesio', 'galio', 'uranio', 'litio', 'aluminio', 'boro'];
-    const charactersList = [...elements, ...elements]; // 20 cartas
+   const elements = ['sodio', 'hidrogenio', 'ouro', 'ferro', 'cesio', 'galio', 'uranio', 'litio', 'aluminio', 'boro'];
+const pairs = Object.fromEntries(elements.map(el => [el, el + '2']));
+
 
     let firstCard = '';
     let secondCard = '';
