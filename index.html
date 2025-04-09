@@ -4,8 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Jogo da Memória - Elementos Químicos</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
   <style>
     * {
@@ -61,7 +59,7 @@
       width: 100%;
       align-items: center;
       justify-content: center;
-      padding: 20px 20px 50px;
+      padding: 20px;
     }
 
     header {
@@ -146,7 +144,6 @@
       <span class="player">Jogador</span>
       <span>Tempo: <span class="timer">0</span>s</span>
     </header>
-
     <div class="grid"></div>
   </main>
 
@@ -159,8 +156,21 @@
     const timer = document.querySelector('.timer');
     const grid = document.querySelector('.grid');
 
-    const elements = ['sodio', 'hidrogenio', 'ouro', 'ferro', 'cesio', 'galio', 'uranio', 'litio', 'aluminio', 'boro'];
-    const charactersList = [...elements, ...elements]; // 20 cartas
+    const pairs = [
+      { id: 'ouro', pair: ['ouro', 'ouro2'] },
+      { id: 'ferro', pair: ['ferro', 'ferro2'] },
+      { id: 'cesio', pair: ['cesio', 'cesio2'] },
+      { id: 'litio', pair: ['litio', 'litio2'] },
+      { id: 'hidrogenio', pair: ['hidrogenio', 'hidrogenio2'] },
+      { id: 'sodio', pair: ['sodio', 'sodio2'] },
+      { id: 'uranio', pair: ['uranio', 'uranio2'] },
+      { id: 'aluminio', pair: ['aluminio', 'aluminio2'] },
+      { id: 'galio', pair: ['galio', 'galio2'] },
+      { id: 'boro', pair: ['boro', 'boro2'] }
+    ];
+
+    const charactersList = pairs.flatMap(p => p.pair);
+    const getBaseId = (name) => name.replace(/[0-9]/g, '');
 
     let firstCard = '';
     let secondCard = '';
@@ -177,15 +187,15 @@
       if (disabledCards.length === charactersList.length) {
         clearInterval(loop);
         setTimeout(() => {
-          alert(`Parabéns, ${spanPlayer.innerHTML}! Seu tempo foi de: ${timer.innerHTML} segundos.`);
-          location.reload(); // reinicia o jogo
+          const again = confirm(`Parabéns, ${spanPlayer.innerHTML}! Seu tempo foi de ${timer.innerHTML} segundos.\nDeseja jogar novamente?`);
+          if (again) location.reload();
         }, 500);
       }
     };
 
     const checkCards = () => {
-      const firstCharacter = firstCard.getAttribute('data-character');
-      const secondCharacter = secondCard.getAttribute('data-character');
+      const firstCharacter = getBaseId(firstCard.getAttribute('data-character'));
+      const secondCharacter = getBaseId(secondCard.getAttribute('data-character'));
 
       if (firstCharacter === secondCharacter) {
         firstCard.firstChild.classList.add('disabled-card');
