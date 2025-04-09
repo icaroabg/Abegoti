@@ -1,10 +1,9 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Jogo da Memória - Elementos</title>
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Jogo da Memória</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
@@ -15,66 +14,80 @@
       font-family: 'Press Start 2P', cursive;
     }
 
-    body, html {
-      height: 100%;
-      background-color: #000;
-      color: #fff;
-    }
-
-    main {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      width: 100%;
-      padding: 20px;
+    body {
       background-image: url('./images/bg.jpg');
       background-size: cover;
       background-position: center;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+
+    .login-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .login-form {
+      background: rgba(255, 255, 255, 0.9);
+      padding: 30px;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .login-form input, .login-form button {
+      padding: 10px;
+      font-size: 1rem;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .game-container {
+      width: 100%;
+      max-width: 1200px;
+      padding: 20px;
     }
 
     header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background-color: rgba(255, 255, 255, 0.8);
-      font-size: 0.8em;
-      width: 100%;
-      max-width: 1000px;
+      background-color: rgba(255, 255, 255, 0.9);
       padding: 20px;
       margin-bottom: 20px;
-      border-radius: 10px;
-      color: #000;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
     }
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 15px;
-      width: 100%;
-      max-width: 1000px;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 10px;
     }
 
     .card {
-      aspect-ratio: 3/4;
       width: 100%;
-      border-radius: 5px;
-      position: relative;
-      transition: all 400ms ease;
+      aspect-ratio: 2 / 3;
+      border-radius: 8px;
       transform-style: preserve-3d;
-      background-color: #ccc;
+      transition: transform 0.4s;
+      position: relative;
     }
 
     .face {
+      position: absolute;
       width: 100%;
       height: 100%;
-      position: absolute;
       background-size: cover;
       background-position: center;
-      border: 4px solid #05186d;
-      border-radius: 5px;
-      transition: all 400ms ease;
+      border-radius: 8px;
+      border: 2px solid #05186d;
     }
 
     .front {
@@ -94,56 +107,40 @@
       filter: grayscale(100%);
       opacity: 0.5;
     }
-
-    .restart-button {
-      margin-top: 30px;
-      padding: 15px 30px;
-      font-size: 14px;
-      cursor: pointer;
-      background-color: #05186d;
-      color: #fff;
-      border: none;
-      border-radius: 10px;
-      display: none;
-      transition: 0.3s;
-    }
-
-    .restart-button:hover {
-      background-color: #0a2ea6;
-    }
-
-    @media screen and (max-width: 768px) {
-      .grid {
-        grid-template-columns: repeat(4, 1fr);
-      }
-
-      header {
-        flex-direction: column;
-        gap: 10px;
-      }
-    }
   </style>
 </head>
-
 <body>
-  <main>
+
+  <div class="login-container">
+    <form class="login-form">
+      <input type="text" placeholder="Digite seu nome" class="player-input" required />
+      <button type="submit">Jogar</button>
+    </form>
+  </div>
+
+  <main class="game-container hidden">
     <header>
       <span class="player"></span>
       <span>Tempo: <span class="timer">00</span></span>
     </header>
-
     <div class="grid"></div>
-    <button class="restart-button" onclick="restartGame()">Tentar Novamente</button>
   </main>
 
   <script>
+    const loginContainer = document.querySelector('.login-container');
+    const loginForm = document.querySelector('.login-form');
+    const input = document.querySelector('.player-input');
+    const gameContainer = document.querySelector('.game-container');
     const grid = document.querySelector('.grid');
     const spanPlayer = document.querySelector('.player');
     const timer = document.querySelector('.timer');
-    const restartButton = document.querySelector('.restart-button');
 
     const elements = ['sodio', 'hidrogenio', 'ouro', 'ferro', 'cesio', 'galio', 'uranio', 'litio', 'aluminio', 'boro'];
-    const charactersList = elements.flatMap(el => [el, el + '2']);
+    const characters = elements.flatMap(el => [el, `${el}2`]);
+
+    let firstCard = '';
+    let secondCard = '';
+    let loop;
 
     const createElement = (tag, className) => {
       const element = document.createElement(tag);
@@ -151,27 +148,27 @@
       return element;
     };
 
-    let firstCard = '';
-    let secondCard = '';
-    let loop;
-
     const checkEndGame = () => {
       const disabledCards = document.querySelectorAll('.disabled-card');
-      if (disabledCards.length === charactersList.length) {
+      if (disabledCards.length === characters.length) {
         clearInterval(loop);
         setTimeout(() => {
-          alert(`Parabéns, ${spanPlayer.innerHTML || "Jogador"}! Seu tempo foi de: ${timer.innerHTML} segundos.`);
-          restartButton.style.display = 'inline-block';
-        }, 300);
+          const playAgain = confirm(`Parabéns, ${spanPlayer.innerHTML}! Seu tempo foi de: ${timer.innerHTML} segundos.\nDeseja jogar novamente?`);
+          if (playAgain) {
+            location.reload();
+          }
+        }, 500);
       }
     };
 
     const checkCards = () => {
-      const firstCharacter = firstCard.getAttribute('data-character');
-      const secondCharacter = secondCard.getAttribute('data-character');
-      const clean = str => str.replace(/2$/, '');
+      const firstChar = firstCard.getAttribute('data-character');
+      const secondChar = secondCard.getAttribute('data-character');
 
-      if (clean(firstCharacter) === clean(secondCharacter)) {
+      const base1 = firstChar.replace('2', '');
+      const base2 = secondChar.replace('2', '');
+
+      if (base1 === base2) {
         firstCard.firstChild.classList.add('disabled-card');
         secondCard.firstChild.classList.add('disabled-card');
         firstCard = '';
@@ -183,13 +180,12 @@
           secondCard.classList.remove('reveal-card');
           firstCard = '';
           secondCard = '';
-        }, 600);
+        }, 800);
       }
     };
 
     const revealCard = ({ target }) => {
       if (target.parentNode.classList.contains('reveal-card') || secondCard) return;
-
       target.parentNode.classList.add('reveal-card');
       if (!firstCard) {
         firstCard = target.parentNode;
@@ -210,13 +206,15 @@
       card.appendChild(back);
       card.setAttribute('data-character', character);
       card.addEventListener('click', revealCard);
-
       return card;
     };
 
     const loadGame = () => {
-      const shuffled = charactersList.sort(() => Math.random() - 0.5);
-      shuffled.forEach(character => grid.appendChild(createCard(character)));
+      const shuffled = [...characters].sort(() => Math.random() - 0.5);
+      shuffled.forEach(character => {
+        const card = createCard(character);
+        grid.appendChild(card);
+      });
     };
 
     const startTimer = () => {
@@ -226,22 +224,18 @@
       }, 1000);
     };
 
-    function restartGame() {
-      grid.innerHTML = '';
-      timer.innerHTML = '00';
-      firstCard = '';
-      secondCard = '';
-      restartButton.style.display = 'none';
-      clearInterval(loop);
-      startTimer();
-      loadGame();
-    }
-
-    window.onload = () => {
-      spanPlayer.innerHTML = localStorage.getItem('player') || 'Jogador';
-      startTimer();
-      loadGame();
-    };
+    loginForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const playerName = input.value.trim();
+      if (playerName) {
+        spanPlayer.innerHTML = playerName;
+        loginContainer.classList.add('hidden');
+        gameContainer.classList.remove('hidden');
+        loadGame();
+        startTimer();
+      }
+    });
   </script>
 </body>
 </html>
+
