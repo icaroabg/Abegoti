@@ -183,32 +183,23 @@
       }
     };
 
-const checkCards = () => {
-  const firstCharacter = firstCard.getAttribute('data-character');
-  const secondCharacter = secondCard.getAttribute('data-character');
+    const checkCards = () => {
+      const firstCharacter = firstCard.getAttribute('data-character');
+      const secondCharacter = secondCard.getAttribute('data-character');
 
-  // Verifica se os nomes são pares: ex. "ouro" e "ouro2"
-  if (
-    pairs[firstCharacter] === secondCharacter || 
-    pairs[secondCharacter] === firstCharacter
-  ) {
-    firstCard.firstChild.classList.add('disabled-card');
-    secondCard.firstChild.classList.add('disabled-card');
-
-    firstCard = '';
-    secondCard = '';
-
-    checkEndGame(); // Verifica se todas as cartas foram encontradas
-  } else {
-    // Não é par: vira as cartas de volta
-    setTimeout(() => {
-      firstCard.classList.remove('reveal-card');
-      secondCard.classList.remove('reveal-card');
-      firstCard = '';
-      secondCard = '';
-    }, 600);
-  }
-};
+      if (firstCharacter === secondCharacter) {
+        firstCard.firstChild.classList.add('disabled-card');
+        secondCard.firstChild.classList.add('disabled-card');
+        firstCard = '';
+        secondCard = '';
+        checkEndGame();
+      } else {
+        setTimeout(() => {
+          firstCard.classList.remove('reveal-card');
+          secondCard.classList.remove('reveal-card');
+          firstCard = '';
+          secondCard = '';
+        }, 600);
       }
     };
 
