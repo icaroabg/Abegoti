@@ -1,12 +1,13 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Jogo da Memória</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jogo da Memória - Elementos Químicos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
-
     * {
       margin: 0;
       padding: 0;
@@ -18,76 +19,92 @@
       background-image: url('./images/bg.jpg');
       background-size: cover;
       background-position: center;
-      height: 100vh;
+      min-height: 100vh;
       display: flex;
+      align-items: center;
       justify-content: center;
-      align-items: center;
       flex-direction: column;
     }
 
-    .login-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .login-form {
-      background: rgba(255, 255, 255, 0.9);
-      padding: 30px;
+    .start-screen {
+      background-color: rgba(255, 255, 255, 0.95);
+      padding: 40px;
       border-radius: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
+      text-align: center;
+      box-shadow: 0 0 10px #333;
     }
 
-    .login-form input, .login-form button {
+    .start-screen h2 {
+      margin-bottom: 20px;
+    }
+
+    .start-screen input {
       padding: 10px;
-      font-size: 1rem;
+      font-size: 16px;
+      width: 80%;
+      margin-bottom: 20px;
     }
 
-    .hidden {
+    .start-screen button {
+      padding: 10px 20px;
+      font-size: 14px;
+      cursor: pointer;
+      border-radius: 5px;
+      background-color: #05186d;
+      color: white;
+      border: none;
+    }
+
+    main {
       display: none;
-    }
-
-    .game-container {
+      flex-direction: column;
       width: 100%;
-      max-width: 1200px;
-      padding: 20px;
+      align-items: center;
+      justify-content: center;
+      padding: 20px 20px 50px;
     }
 
     header {
-      background-color: rgba(255, 255, 255, 0.9);
-      padding: 20px;
-      margin-bottom: 20px;
-      border-radius: 8px;
       display: flex;
+      align-items: center;
       justify-content: space-between;
-      font-size: 0.8rem;
+      background-color: rgba(255, 255, 255, 0.8);
+      font-size: 1.2em;
+      width: 100%;
+      max-width: 800px;
+      padding: 30px;
+      margin-bottom: 30px;
+      border-radius: 5px;
     }
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 10px;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 15px;
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
     }
 
     .card {
-      width: 100%;
-      aspect-ratio: 2 / 3;
-      border-radius: 8px;
-      transform-style: preserve-3d;
-      transition: transform 0.4s;
+      aspect-ratio: 3/4;
+      width: 50%;
+      border-radius: 5px;
       position: relative;
+      transition: all 400ms ease;
+      transform-style: preserve-3d;
+      background-color: #ccc;
     }
 
     .face {
-      position: absolute;
       width: 100%;
       height: 100%;
+      position: absolute;
       background-size: cover;
       background-position: center;
-      border-radius: 8px;
-      border: 2px solid #05186d;
+      border: 5px solid #05186d;
+      border-radius: 5px;
+      transition: all 400ms ease;
     }
 
     .front {
@@ -104,138 +121,141 @@
     }
 
     .disabled-card {
-      filter: grayscale(100%);
+      filter: saturate(0);
       opacity: 0.5;
+    }
+
+    @media screen and (max-width: 920px) {
+      .grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
     }
   </style>
 </head>
 <body>
 
-  <div class="login-container">
-    <form class="login-form">
-      <input type="text" placeholder="Digite seu nome" class="player-input" required />
-      <button type="submit">Jogar</button>
-    </form>
+  <div class="start-screen">
+    <h2>Digite seu nome:</h2>
+    <input type="text" class="input-name" placeholder="Seu nome" />
+    <br />
+    <button class="start-button">Jogar</button>
   </div>
 
-  <main class="game-container hidden">
+  <main>
     <header>
-      <span class="player"></span>
-      <span>Tempo: <span class="timer">00</span></span>
+      <span class="player">Jogador</span>
+      <span>Tempo: <span class="timer">0</span>s</span>
     </header>
+
     <div class="grid"></div>
   </main>
 
   <script>
-    const loginContainer = document.querySelector('.login-container');
-    const loginForm = document.querySelector('.login-form');
-    const input = document.querySelector('.player-input');
-    const gameContainer = document.querySelector('.game-container');
-    const grid = document.querySelector('.grid');
-    const spanPlayer = document.querySelector('.player');
-    const timer = document.querySelector('.timer');
+   const grid = document.querySelector('.grid');
+const spanPlayer = document.querySelector('.player');
+const timer = document.querySelector('.timer');
 
-    const elements = ['sodio', 'hidrogenio', 'ouro', 'ferro', 'cesio', 'galio', 'uranio', 'litio', 'aluminio', 'boro'];
-    const characters = elements.flatMap(el => [el, `${el}2`]);
+const elements = ['sodio', 'hidrogenio', 'ouro', 'ferro', 'cesio', 'galio', 'uranio', 'litio', 'aluminio', 'boro'];
+const pairs = Object.fromEntries(elements.map(el => [el, el + '2']));
 
-    let firstCard = '';
-    let secondCard = '';
-    let loop;
+const createElement = (tag, className) => {
+  const element = document.createElement(tag);
+  element.className = className;
+  return element;
+};
 
-    const createElement = (tag, className) => {
-      const element = document.createElement(tag);
-      element.className = className;
-      return element;
-    };
+let firstCard = '';
+let secondCard = '';
 
-    const checkEndGame = () => {
-      const disabledCards = document.querySelectorAll('.disabled-card');
-      if (disabledCards.length === characters.length) {
-        clearInterval(loop);
-        setTimeout(() => {
-          const playAgain = confirm(`Parabéns, ${spanPlayer.innerHTML}! Seu tempo foi de: ${timer.innerHTML} segundos.\nDeseja jogar novamente?`);
-          if (playAgain) {
-            location.reload();
-          }
-        }, 500);
-      }
-    };
+const checkEndGame = () => {
+  const disabledCards = document.querySelectorAll('.disabled-card');
 
-    const checkCards = () => {
-      const firstChar = firstCard.getAttribute('data-character');
-      const secondChar = secondCard.getAttribute('data-character');
+  if (disabledCards.length === 20) {
+    clearInterval(this.loop);
+    alert(`Parabéns, ${spanPlayer.innerHTML}! Seu tempo foi de: ${timer.innerHTML}`);
+  }
+};
 
-      const base1 = firstChar.replace('2', '');
-      const base2 = secondChar.replace('2', '');
+const checkCards = () => {
+  const firstCharacter = firstCard.getAttribute('data-character');
+  const secondCharacter = secondCard.getAttribute('data-character');
 
-      if (base1 === base2) {
-        firstCard.firstChild.classList.add('disabled-card');
-        secondCard.firstChild.classList.add('disabled-card');
-        firstCard = '';
-        secondCard = '';
-        checkEndGame();
-      } else {
-        setTimeout(() => {
-          firstCard.classList.remove('reveal-card');
-          secondCard.classList.remove('reveal-card');
-          firstCard = '';
-          secondCard = '';
-        }, 800);
-      }
-    };
+  if (pairs[firstCharacter] === secondCharacter || pairs[secondCharacter] === firstCharacter) {
+    firstCard.firstChild.classList.add('disabled-card');
+    secondCard.firstChild.classList.add('disabled-card');
 
-    const revealCard = ({ target }) => {
-      if (target.parentNode.classList.contains('reveal-card') || secondCard) return;
-      target.parentNode.classList.add('reveal-card');
-      if (!firstCard) {
-        firstCard = target.parentNode;
-      } else {
-        secondCard = target.parentNode;
-        checkCards();
-      }
-    };
+    firstCard = '';
+    secondCard = '';
 
-    const createCard = (character) => {
-      const card = createElement('div', 'card');
-      const front = createElement('div', 'face front');
-      const back = createElement('div', 'face back');
+    checkEndGame();
+  } else {
+    setTimeout(() => {
+      firstCard.classList.remove('reveal-card');
+      secondCard.classList.remove('reveal-card');
 
-      front.style.backgroundImage = `url('./images/${character}.png')`;
+      firstCard = '';
+      secondCard = '';
+    }, 500);
+  }
+};
 
-      card.appendChild(front);
-      card.appendChild(back);
-      card.setAttribute('data-character', character);
-      card.addEventListener('click', revealCard);
-      return card;
-    };
+const revealCard = ({ target }) => {
+  if (target.parentNode.className.includes('reveal-card')) {
+    return;
+  }
 
-    const loadGame = () => {
-      const shuffled = [...characters].sort(() => Math.random() - 0.5);
-      shuffled.forEach(character => {
-        const card = createCard(character);
-        grid.appendChild(card);
-      });
-    };
+  if (firstCard === '') {
+    target.parentNode.classList.add('reveal-card');
+    firstCard = target.parentNode;
+  } else if (secondCard === '') {
+    target.parentNode.classList.add('reveal-card');
+    secondCard = target.parentNode;
 
-    const startTimer = () => {
-      let time = 0;
-      loop = setInterval(() => {
-        timer.innerHTML = ++time;
-      }, 1000);
-    };
+    checkCards();
+  }
+};
 
-    loginForm.addEventListener('submit', (event) => {
-      event.preventDefault();
-      const playerName = input.value.trim();
-      if (playerName) {
-        spanPlayer.innerHTML = playerName;
-        loginContainer.classList.add('hidden');
-        gameContainer.classList.remove('hidden');
-        loadGame();
-        startTimer();
-      }
-    });
+const createCard = (character) => {
+  const card = createElement('div', 'card');
+  const front = createElement('div', 'face front');
+  const back = createElement('div', 'face back');
+
+  front.style.backgroundImage = `url('../images/${character}.png')`;
+
+  card.appendChild(front);
+  card.appendChild(back);
+
+  card.addEventListener('click', revealCard);
+  card.setAttribute('data-character', character);
+
+  return card;
+};
+
+const loadGame = () => {
+  const charactersList = elements.flatMap(el => [el, el + '2']);
+  const shuffledArray = charactersList.sort(() => Math.random() - 0.5);
+
+  shuffledArray.forEach((character) => {
+    const card = createCard(character);
+    grid.appendChild(card);
+  });
+};
+
+const startTimer = () => {
+  this.loop = setInterval(() => {
+    const currentTime = +timer.innerHTML;
+    timer.innerHTML = currentTime + 1;
+  }, 1000);
+};
+
+window.onload = () => {
+  spanPlayer.innerHTML = localStorage.getItem('player');
+  startTimer();
+  loadGame();
+};
+
   </script>
 </body>
 </html>
+
 
