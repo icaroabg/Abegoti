@@ -88,7 +88,7 @@
 
     .card {
       aspect-ratio: 3/4;
-      width: 50%;
+      width: 100%;
       border-radius: 5px;
       position: relative;
       transition: all 400ms ease;
@@ -151,111 +151,118 @@
   </main>
 
   <script>
-   const grid = document.querySelector('.grid');
-const spanPlayer = document.querySelector('.player');
-const timer = document.querySelector('.timer');
+    const startScreen = document.querySelector('.start-screen');
+    const startButton = document.querySelector('.start-button');
+    const inputName = document.querySelector('.input-name');
+    const main = document.querySelector('main');
+    const spanPlayer = document.querySelector('.player');
+    const timer = document.querySelector('.timer');
+    const grid = document.querySelector('.grid');
 
-const elements = ['sodio', 'hidrogenio', 'ouro', 'ferro', 'cesio', 'galio', 'uranio', 'litio', 'aluminio', 'boro'];
-const pairs = Object.fromEntries(elements.map(el => [el, el + '2']));
+    const elements = ['sodio', 'hidrogenio', 'ouro', 'ferro', 'cesio', 'galio', 'uranio', 'litio', 'aluminio', 'boro'];
+    const charactersList = [...elements, ...elements]; // 20 cartas
 
-const createElement = (tag, className) => {
-  const element = document.createElement(tag);
-  element.className = className;
-  return element;
-};
+    let firstCard = '';
+    let secondCard = '';
+    let loop;
 
-let firstCard = '';
-let secondCard = '';
+    const createElement = (tag, className) => {
+      const element = document.createElement(tag);
+      element.className = className;
+      return element;
+    };
 
-const checkEndGame = () => {
-  const disabledCards = document.querySelectorAll('.disabled-card');
-
-  if (disabledCards.length === 20) {
-    clearInterval(this.loop);
-    alert(`Parabéns, ${spanPlayer.innerHTML}! Seu tempo foi de: ${timer.innerHTML}`);
-  }
-};
+    const checkEndGame = () => {
+      const disabledCards = document.querySelectorAll('.disabled-card');
+      if (disabledCards.length === charactersList.length) {
+        clearInterval(loop);
+        setTimeout(() => {
+          alert(`Parabéns, ${spanPlayer.innerHTML}! Seu tempo foi de: ${timer.innerHTML} segundos.`);
+          location.reload(); // reinicia o jogo
+        }, 500);
+      }
+    };
 
 const checkCards = () => {
   const firstCharacter = firstCard.getAttribute('data-character');
   const secondCharacter = secondCard.getAttribute('data-character');
 
-  if (pairs[firstCharacter] === secondCharacter || pairs[secondCharacter] === firstCharacter) {
+  // Verifica se os nomes são pares: ex. "ouro" e "ouro2"
+  if (
+    pairs[firstCharacter] === secondCharacter || 
+    pairs[secondCharacter] === firstCharacter
+  ) {
     firstCard.firstChild.classList.add('disabled-card');
     secondCard.firstChild.classList.add('disabled-card');
 
     firstCard = '';
     secondCard = '';
 
-    checkEndGame();
+    checkEndGame(); // Verifica se todas as cartas foram encontradas
   } else {
+    // Não é par: vira as cartas de volta
     setTimeout(() => {
       firstCard.classList.remove('reveal-card');
       secondCard.classList.remove('reveal-card');
-
       firstCard = '';
       secondCard = '';
-    }, 500);
+    }, 300);
   }
 };
+      }
+    };
 
-const revealCard = ({ target }) => {
-  if (target.parentNode.className.includes('reveal-card')) {
-    return;
-  }
+    const revealCard = ({ target }) => {
+      if (target.parentNode.classList.contains('reveal-card') || secondCard) return;
+      target.parentNode.classList.add('reveal-card');
+      if (!firstCard) {
+        firstCard = target.parentNode;
+      } else {
+        secondCard = target.parentNode;
+        checkCards();
+      }
+    };
 
-  if (firstCard === '') {
-    target.parentNode.classList.add('reveal-card');
-    firstCard = target.parentNode;
-  } else if (secondCard === '') {
-    target.parentNode.classList.add('reveal-card');
-    secondCard = target.parentNode;
+    const createCard = (character) => {
+      const card = createElement('div', 'card');
+      const front = createElement('div', 'face front');
+      const back = createElement('div', 'face back');
 
-    checkCards();
-  }
-};
+      front.style.backgroundImage = `url('./images/${character}.png')`;
 
-const createCard = (character) => {
-  const card = createElement('div', 'card');
-  const front = createElement('div', 'face front');
-  const back = createElement('div', 'face back');
+      card.appendChild(front);
+      card.appendChild(back);
 
-  front.style.backgroundImage = `url('../images/${character}.png')`;
+      card.setAttribute('data-character', character);
+      card.addEventListener('click', revealCard);
 
-  card.appendChild(front);
-  card.appendChild(back);
+      return card;
+    };
 
-  card.addEventListener('click', revealCard);
-  card.setAttribute('data-character', character);
+    const loadGame = () => {
+      const shuffled = charactersList.sort(() => Math.random() - 0.5);
+      shuffled.forEach(character => {
+        const card = createCard(character);
+        grid.appendChild(card);
+      });
+    };
 
-  return card;
-};
+    const startTimer = () => {
+      let time = 0;
+      loop = setInterval(() => {
+        timer.innerHTML = ++time;
+      }, 1000);
+    };
 
-const loadGame = () => {
-  const charactersList = elements.flatMap(el => [el, el + '2']);
-  const shuffledArray = charactersList.sort(() => Math.random() - 0.5);
-
-  shuffledArray.forEach((character) => {
-    const card = createCard(character);
-    grid.appendChild(card);
-  });
-};
-
-const startTimer = () => {
-  this.loop = setInterval(() => {
-    const currentTime = +timer.innerHTML;
-    timer.innerHTML = currentTime + 1;
-  }, 1000);
-};
-
-window.onload = () => {
-  spanPlayer.innerHTML = localStorage.getItem('player');
-  startTimer();
-  loadGame();
-};
-
+    startButton.addEventListener('click', () => {
+      const name = inputName.value.trim();
+      if (!name) return alert("Digite seu nome!");
+      spanPlayer.innerHTML = name;
+      startScreen.style.display = 'none';
+      main.style.display = 'flex';
+      startTimer();
+      loadGame();
+    });
   </script>
 </body>
 </html>
-
-
