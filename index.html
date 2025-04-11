@@ -88,7 +88,6 @@
       gap: 10px;
       width: 100%;
       max-width: 900px;
-      transition: transform 0.5s ease-in-out; /* Adicionando animação suave */
     }
 
     .card {
@@ -97,7 +96,7 @@
       border-radius: 5px;
       position: relative;
       transform-style: preserve-3d;
-      transition: transform 0.5s;
+      transition: transform 0.3s;
       cursor: pointer;
     }
 
@@ -182,15 +181,14 @@
     }
 
     .card.shuffle-effect {
-  animation: shuffle-spin 0.6s ease-in-out;
-}
+      animation: shuffle-spin 0.6s ease-in-out;
+    }
 
-@keyframes shuffle-spin {
-  0% { transform: rotateY(0deg); }
-  50% { transform: rotateY(180deg); }
-  100% { transform: rotateY(0deg); }
-}
-
+    @keyframes shuffle-spin {
+      0% { transform: rotateY(0deg); }
+      50% { transform: rotateY(180deg); }
+      100% { transform: rotateY(0deg); }
+    }
 
     @media screen and (max-width: 768px) {
       .grid {
@@ -340,43 +338,26 @@
       const shuffled = charactersList.sort(() => Math.random() - 0.5);
       grid.innerHTML = '';
       shuffled.forEach(character => grid.appendChild(createCard(character)));
+
+      const allCards = document.querySelectorAll('.card');
+      allCards.forEach(card => card.classList.add('reveal-card'));
+
+      setTimeout(() => {
+        allCards.forEach(card => card.classList.remove('reveal-card'));
+
+        setTimeout(() => {
+          allCards.forEach(card => {
+            card.classList.add('shuffle-effect');
+            setTimeout(() => card.classList.remove('shuffle-effect'), 600);
+          });
+
+          const shuffledAgain = Array.from(allCards).sort(() => Math.random() - 0.5);
+          shuffledAgain.forEach(card => grid.appendChild(card));
+
+        }, 200);
+      }, 1500);
     };
 
-const loadGame = () => {
-  const shuffled = charactersList.sort(() => Math.random() - 0.5);
-  grid.innerHTML = ''; // limpa grid
-
-  shuffled.forEach(character => {
-    const card = createCard(character);
-    grid.appendChild(card);
-  });
-
-  const allCards = document.querySelectorAll('.card');
-
-  // Mostrar todas as cartas inicialmente
-  allCards.forEach(card => card.classList.add('reveal-card'));
-
-  // Após 2s, esconder e embaralhar visualmente
-  setTimeout(() => {
-    allCards.forEach(card => card.classList.remove('reveal-card'));
-
-    // Adiciona efeito visual de embaralhamento
-    setTimeout(() => {
-      allCards.forEach(card => {
-        card.classList.add('shuffle-effect');
-        setTimeout(() => card.classList.remove('shuffle-effect'), 600);
-      });
-
-      // Embaralha novamente e reordena no DOM pra parecer bem visível
-      const shuffledAgain = Array.from(allCards).sort(() => Math.random() - 0.5);
-      shuffledAgain.forEach(card => grid.appendChild(card));
-
-    }, 200); // pequena pausa antes do "shuffle" visual
-
-  }, 1450); // tempo de exibição inicial
-};
-
-    
     const startTimer = () => {
       let time = 0;
       loop = setInterval(() => {
@@ -410,19 +391,6 @@ const loadGame = () => {
       soundStart.play();
       startTimer();
       loadGame();
-      
-      // Exibindo as cartas por 1.5 segundos
-      const allCards = document.querySelectorAll('.card');
-      setTimeout(() => {
-        allCards.forEach(card => card.classList.add('reveal-card'));
-        
-        // Embaralhamento após 1.5 segundos
-        grid.style.transition = 'transform 1.5s ease-out'; // Suavizando o movimento de embaralhamento
-        setTimeout(() => {
-          grid.style.transition = 'transform 0s'; // Desativa o efeito de transição após o embaralhamento
-          loadGame();
-        }, 1500);
-      }, 1500);
     });
 
     const musicToggleButton = document.getElementById('music-toggle-btn');
