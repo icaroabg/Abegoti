@@ -202,6 +202,24 @@
         transform: translateY(0);
       }
     }
+
+    @keyframes shuffleCards {
+      0% {
+        transform: rotateY(0deg);
+      }
+      25% {
+        transform: rotateY(90deg);
+      }
+      50% {
+        transform: rotateY(180deg);
+      }
+      75% {
+        transform: rotateY(270deg);
+      }
+      100% {
+        transform: rotateY(360deg);
+      }
+    }
   </style>
 </head>
 <body>
@@ -341,9 +359,11 @@
       const shuffled = charactersList.sort(() => Math.random() - 0.5);
       grid.innerHTML = '';
       shuffled.forEach(character => grid.appendChild(createCard(character)));
+
       setTimeout(() => {
         grid.style.opacity = 1;
-      }, 100);
+        grid.style.animation = 'shuffleCards 1s ease-out forwards'; // Adicionando animação de embaralhamento
+      }, 1500); // Exibe as cartas por 1,5 segundos antes de embaralhá-las
     };
 
     const startTimer = () => {
