@@ -26,32 +26,48 @@
     }
 
     .start-screen {
-      background-color: rgba(255, 255, 255, 0.95);
+      background: linear-gradient(135deg, #ffffff, #d1e3ff);
       padding: 40px;
-      border-radius: 10px;
+      border-radius: 15px;
       text-align: center;
-      box-shadow: 0 0 10px #333;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      animation: fadeIn 1s ease-in-out;
     }
 
     .start-screen h2 {
       margin-bottom: 20px;
+      font-size: 1.2em;
+      color: #05186d;
     }
 
     .start-screen input {
-      padding: 10px;
-      font-size: 16px;
-      width: 80%;
-      margin-bottom: 20px;
+      padding: 12px 15px;
+      font-size: 14px;
+      border-radius: 8px;
+      border: 2px solid #05186d;
+      width: 90%;
+      margin-bottom: 25px;
+      outline: none;
     }
 
     .start-screen button {
-      padding: 10px 20px;
+      padding: 12px 30px;
       font-size: 14px;
       cursor: pointer;
-      border-radius: 5px;
+      border-radius: 8px;
       background-color: #05186d;
       color: white;
       border: none;
+      transition: background-color 0.3s;
+    }
+
+    .start-screen button:hover {
+      background-color: #0d2fa3;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     main {
@@ -142,16 +158,18 @@
 
     .ranking {
       margin-top: 30px;
-      background-color: rgba(255, 255, 255, 0.8);
-      padding: 20px;
-      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 25px;
+      border-radius: 15px;
       width: 100%;
       max-width: 600px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
     }
 
     .ranking h2 {
-      margin-bottom: 10px;
+      margin-bottom: 15px;
       font-size: 1.5em;
+      color: #05186d;
     }
 
     .ranking ul {
@@ -161,23 +179,34 @@
 
     .ranking li {
       margin-bottom: 10px;
-      font-size: 1.2em;
+      font-size: 1.1em;
+      padding: 10px;
+      background-color: #e6f0ff;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .ranking li:nth-child(1)::before {
+      content: "🥇 ";
+    }
+
+    .ranking li:nth-child(2)::before {
+      content: "🥈 ";
+    }
+
+    .ranking li:nth-child(3)::before {
+      content: "🥉 ";
     }
   </style>
 </head>
 <body>
-    <div class="game-container">
-    <!-- Adiciona o botão para ligar/desligar música -->
+  <div class="game-container">
     <button id="music-toggle-btn">Ligar Música</button>
-    
-    <!-- Área do jogo -->
-    <div id="game-board">
-      <!-- Seu conteúdo do jogo vai aqui -->
-    </div>
-    
+    <div id="game-board"></div>
     <audio id="background-music" loop>
       <source src="Antoine Dufour - Talk (Coldplay).mp3" type="audio/mpeg">
-      Seu navegador não suporta o elemento de áudio.
     </audio>
   </div>
 
@@ -204,208 +233,205 @@
     </ul>
   </div>
 
-  <!-- [tudo igual até antes do <script>] -->
+  <script>
+    const startScreen = document.querySelector('.start-screen');
+    const startButton = document.querySelector('.start-button');
+    const inputName = document.querySelector('.input-name');
+    const main = document.querySelector('main');
+    const spanPlayer = document.querySelector('.player');
+    const timer = document.querySelector('.timer');
+    const grid = document.querySelector('.grid');
+    const attempts = document.querySelector('.attempts');
+    const rankingList = document.getElementById('ranking-list');
 
-<script>
-  const startScreen = document.querySelector('.start-screen');
-  const startButton = document.querySelector('.start-button');
-  const inputName = document.querySelector('.input-name');
-  const main = document.querySelector('main');
-  const spanPlayer = document.querySelector('.player');
-  const timer = document.querySelector('.timer');
-  const grid = document.querySelector('.grid');
-  const attempts = document.querySelector('.attempts');
-  const rankingList = document.getElementById('ranking-list');
+    const pairs = [
+      { id: 'ouro', pair: ['ouro', 'ouro2'] },
+      { id: 'ferro', pair: ['ferro', 'ferro2'] },
+      { id: 'cesio', pair: ['cesio', 'cesio2'] },
+      { id: 'litio', pair: ['litio', 'litio2'] },
+      { id: 'hidrogenio', pair: ['hidrogenio', 'hidrogenio2'] },
+      { id: 'sodio', pair: ['sodio', 'sodio2'] },
+      { id: 'uranio', pair: ['uranio', 'uranio2'] },
+      { id: 'aluminio', pair: ['aluminio', 'aluminio2'] },
+      { id: 'galio', pair: ['galio', 'galio2'] },
+      { id: 'boro', pair: ['boro', 'boro2'] }
+    ];
 
-  const pairs = [
-    { id: 'ouro', pair: ['ouro', 'ouro2'] },
-    { id: 'ferro', pair: ['ferro', 'ferro2'] },
-    { id: 'cesio', pair: ['cesio', 'cesio2'] },
-    { id: 'litio', pair: ['litio', 'litio2'] },
-    { id: 'hidrogenio', pair: ['hidrogenio', 'hidrogenio2'] },
-    { id: 'sodio', pair: ['sodio', 'sodio2'] },
-    { id: 'uranio', pair: ['uranio', 'uranio2'] },
-    { id: 'aluminio', pair: ['aluminio', 'aluminio2'] },
-    { id: 'galio', pair: ['galio', 'galio2'] },
-    { id: 'boro', pair: ['boro', 'boro2'] }
-  ];
+    const charactersList = pairs.flatMap(p => p.pair);
+    const getBaseId = (name) => name.replace(/[0-9]/g, '');
 
-  const charactersList = pairs.flatMap(p => p.pair);
-  const getBaseId = (name) => name.replace(/[0-9]/g, '');
+    let firstCard = '';
+    let secondCard = '';
+    let loop;
+    let attemptCount = 0;
+    let playerName = '';
+    let playerTime = 0;
 
-  let firstCard = '';
-  let secondCard = '';
-  let loop;
-  let attemptCount = 0;
-  let playerName = '';
-  let playerTime = 0;
+    const soundStart = new Audio('./sounds/start.mp3');
+    const soundFlip = new Audio('./sounds/flip.mp3');
+    const soundMatch = new Audio('./sounds/match.mp3');
+    const soundMismatch = new Audio('./sounds/mismatch.mp3');
+    const soundWin = new Audio('./sounds/win.mp3');
 
-  // 🎵 SONS
-  const soundStart = new Audio('./sounds/start.mp3');
-  const soundFlip = new Audio('./sounds/flip.mp3');
-  const soundMatch = new Audio('./sounds/match.mp3');
-  const soundMismatch = new Audio('./sounds/mismatch.mp3');
-  const soundWin = new Audio('./sounds/win.mp3');
+    const createElement = (tag, className) => {
+      const element = document.createElement(tag);
+      element.className = className;
+      return element;
+    };
 
-  const createElement = (tag, className) => {
-    const element = document.createElement(tag);
-    element.className = className;
-    return element;
-  };
+    const checkEndGame = () => {
+      const disabledCards = document.querySelectorAll('.disabled-card');
+      if (disabledCards.length === charactersList.length) {
+        clearInterval(loop);
+        soundWin.play();
+        setTimeout(() => {
+          const again = confirm(`Parabéns, ${spanPlayer.innerHTML}! Seu tempo foi de ${timer.innerHTML} segundos e você fez ${attemptCount} tentativas.\nDeseja jogar novamente?`);
+          if (again) location.reload();
+        }, 500);
+        saveToRanking();
+      }
+    };
 
-  const checkEndGame = () => {
-    const disabledCards = document.querySelectorAll('.disabled-card');
-    if (disabledCards.length === charactersList.length) {
-      clearInterval(loop);
-      soundWin.play(); // 🏁 Som de vitória
-      setTimeout(() => {
-        const again = confirm(`Parabéns, ${spanPlayer.innerHTML}! Seu tempo foi de ${timer.innerHTML} segundos e você fez ${attemptCount} tentativas.\nDeseja jogar novamente?`);
-        if (again) location.reload();
-      }, 500);
-      saveToRanking();
-    }
-  };
+    const checkCards = () => {
+      const firstCharacter = getBaseId(firstCard.getAttribute('data-character'));
+      const secondCharacter = getBaseId(secondCard.getAttribute('data-character'));
 
-  const checkCards = () => {
-    const firstCharacter = getBaseId(firstCard.getAttribute('data-character'));
-    const secondCharacter = getBaseId(secondCard.getAttribute('data-character'));
-
-    if (firstCharacter === secondCharacter) {
-      soundMatch.play(); // ✅ Som de acerto
-      firstCard.firstChild.classList.add('disabled-card');
-      secondCard.firstChild.classList.add('disabled-card');
-      firstCard = '';
-      secondCard = '';
-      checkEndGame();
-    } else {
-      soundMismatch.play(); // ❌ Som de erro
-      setTimeout(() => {
-        firstCard.classList.remove('reveal-card');
-        secondCard.classList.remove('reveal-card');
+      if (firstCharacter === secondCharacter) {
+        soundMatch.play();
+        firstCard.firstChild.classList.add('disabled-card');
+        secondCard.firstChild.classList.add('disabled-card');
         firstCard = '';
         secondCard = '';
-      }, 600);
-    }
-  };
+        checkEndGame();
+      } else {
+        soundMismatch.play();
+        setTimeout(() => {
+          firstCard.classList.remove('reveal-card');
+          secondCard.classList.remove('reveal-card');
+          firstCard = '';
+          secondCard = '';
+        }, 600);
+      }
+    };
 
-  const revealCard = ({ target }) => {
-    if (target.parentNode.classList.contains('reveal-card') || secondCard) return;
-    target.parentNode.classList.add('reveal-card');
+    const revealCard = ({ target }) => {
+      if (target.parentNode.classList.contains('reveal-card') || secondCard) return;
+      target.parentNode.classList.add('reveal-card');
 
-    soundFlip.play(); // 🔄 Som de virar carta
+      soundFlip.play();
 
-    if (!firstCard) {
-      firstCard = target.parentNode;
-    } else {
-      secondCard = target.parentNode;
-      checkCards();
-    }
+      if (!firstCard) {
+        firstCard = target.parentNode;
+      } else {
+        secondCard = target.parentNode;
+        checkCards();
+      }
 
-    attemptCount++;
-    attempts.innerHTML = attemptCount;
-  };
+      attemptCount++;
+      attempts.innerHTML = attemptCount;
+    };
 
-  const createCard = (character) => {
-    const card = createElement('div', 'card');
-    const front = createElement('div', 'face front');
-    const back = createElement('div', 'face back');
+    const createCard = (character) => {
+      const card = createElement('div', 'card');
+      const front = createElement('div', 'face front');
+      const back = createElement('div', 'face back');
 
-    front.style.backgroundImage = `url('./images/${character}.png')`;
+      front.style.backgroundImage = `url('./images/${character}.png')`;
 
-    card.appendChild(front);
-    card.appendChild(back);
+      card.appendChild(front);
+      card.appendChild(back);
 
-    card.setAttribute('data-character', character);
-    card.addEventListener('click', revealCard);
+      card.setAttribute('data-character', character);
+      card.addEventListener('click', revealCard);
 
-    return card;
-  };
+      return card;
+    };
 
-  const loadGame = () => {
-    const shuffled = charactersList.sort(() => Math.random() - 0.5);
-    grid.innerHTML = '';
+    const loadGame = () => {
+      const shuffled = charactersList.sort(() => Math.random() - 0.5);
+      grid.innerHTML = '';
 
-    shuffled.forEach(character => {
-      const card = createCard(character);
-      grid.appendChild(card);
-    });
+      shuffled.forEach(character => {
+        const card = createCard(character);
+        grid.appendChild(card);
+      });
 
-    const allCards = document.querySelectorAll('.card');
-    allCards.forEach(card => card.classList.add('reveal-card'));
-
-    setTimeout(() => {
-      allCards.forEach(card => card.classList.remove('reveal-card'));
+      const allCards = document.querySelectorAll('.card');
+      allCards.forEach(card => card.classList.add('reveal-card'));
 
       setTimeout(() => {
-        allCards.forEach((card, index) => {
-          setTimeout(() => {
-            card.classList.add('shuffle-effect');
-            setTimeout(() => card.classList.remove('shuffle-effect'), 600);
-          }, index * 20);
-        });
+        allCards.forEach(card => card.classList.remove('reveal-card'));
 
-        const shuffledAgain = Array.from(allCards).sort(() => Math.random() - 0.5);
-        shuffledAgain.forEach(card => grid.appendChild(card));
+        setTimeout(() => {
+          allCards.forEach((card, index) => {
+            setTimeout(() => {
+              card.classList.add('shuffle-effect');
+              setTimeout(() => card.classList.remove('shuffle-effect'), 600);
+            }, index * 20);
+          });
 
-      }, 300);
+          const shuffledAgain = Array.from(allCards).sort(() => Math.random() - 0.5);
+          shuffledAgain.forEach(card => grid.appendChild(card));
 
-    }, 1450);
-  };
+        }, 300);
 
-  const startTimer = () => {
-    let time = 0;
-    loop = setInterval(() => {
-      timer.innerHTML = ++time;
-      playerTime = time;
-    }, 1000);
-  };
+      }, 1450);
+    };
 
-  const loadRanking = () => {
-    const ranking = JSON.parse(localStorage.getItem('ranking')) || [];
-    rankingList.innerHTML = ranking
-      .sort((a, b) => a.time - b.time)
-      .map((player, index) => `<li>${index + 1}. ${player.name} - ${player.time}s</li>`)
-      .join('');
-  };
+    const startTimer = () => {
+      let time = 0;
+      loop = setInterval(() => {
+        timer.innerHTML = ++time;
+        playerTime = time;
+      }, 1000);
+    };
 
-  const saveToRanking = () => {
-    const ranking = JSON.parse(localStorage.getItem('ranking')) || [];
-    ranking.push({ name: playerName, time: playerTime });
-    localStorage.setItem('ranking', JSON.stringify(ranking));
-    loadRanking();
-  };
+    const loadRanking = () => {
+      const ranking = JSON.parse(localStorage.getItem('ranking')) || [];
+      const sorted = ranking.sort((a, b) => a.time - b.time);
+      rankingList.innerHTML = sorted.map((player, index) => {
+        const highlight = player.name === playerName ? 'style="background:#d6ffd6;"' : '';
+        return `<li ${highlight}>${index + 1}. ${player.name} - ${player.time}s</li>`;
+      }).join('');
+    };
 
-  startButton.addEventListener('click', () => {
-    playerName = inputName.value.trim();
-    if (!playerName) return alert("Digite seu nome!");
-    spanPlayer.innerHTML = playerName;
-    startScreen.style.display = 'none';
-    main.style.display = 'flex';
-    soundStart.play(); // ▶️ Som ao iniciar
-    startTimer();
-    loadGame();
-  });
-// Seleciona o botão e o elemento de áudio
-const musicToggleButton = document.getElementById('music-toggle-btn');
-const backgroundMusic = document.getElementById('background-music');
+    const saveToRanking = () => {
+      const ranking = JSON.parse(localStorage.getItem('ranking')) || [];
+      ranking.push({ name: playerName, time: playerTime });
+      localStorage.setItem('ranking', JSON.stringify(ranking));
+      loadRanking();
+    };
 
-// Define o estado inicial da música (desligada)
-let isMusicOn = false;
+    startButton.addEventListener('click', () => {
+      playerName = inputName.value.trim();
+      if (!playerName) return alert("Digite seu nome!");
+      spanPlayer.innerHTML = playerName;
+      startScreen.style.display = 'none';
+      main.style.display = 'flex';
+      soundStart.play();
+      startTimer();
+      loadGame();
+    });
 
-// Função para alternar a música
-function toggleMusic() {
-  if (isMusicOn) {
-    backgroundMusic.pause();
-    musicToggleButton.textContent = 'Ativar Música';
-  } else {
-    backgroundMusic.play();
-    musicToggleButton.textContent = 'Desativar Música';
-  }
-  isMusicOn = !isMusicOn;  // Alterna o estado da música
-}
+    const musicToggleButton = document.getElementById('music-toggle-btn');
+    const backgroundMusic = document.getElementById('background-music');
+    let isMusicOn = false;
 
-// Adiciona o evento de clique no botão
-musicToggleButton.addEventListener('click', toggleMusic);
+    function toggleMusic() {
+      if (isMusicOn) {
+        backgroundMusic.pause();
+        musicToggleButton.textContent = 'Ativar Música';
+      } else {
+        backgroundMusic.play();
+        musicToggleButton.textContent = 'Desativar Música';
+      }
+      isMusicOn = !isMusicOn;
+    }
 
-  window.addEventListener('load', loadRanking);
-</script>
+    musicToggleButton.addEventListener('click', toggleMusic);
+
+    window.addEventListener('load', loadRanking);
+  </script>
+</body>
+</html>
+
