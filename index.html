@@ -190,26 +190,65 @@
     </ul>
   </div>
 
-  <script>
+  <!-- [tudo igual até antes do <script>] -->
 
-      // Sons
+<script>
+  const startScreen = document.querySelector('.start-screen');
+  const startButton = document.querySelector('.start-button');
+  const inputName = document.querySelector('.input-name');
+  const main = document.querySelector('main');
+  const spanPlayer = document.querySelector('.player');
+  const timer = document.querySelector('.timer');
+  const grid = document.querySelector('.grid');
+  const attempts = document.querySelector('.attempts');
+  const rankingList = document.getElementById('ranking-list');
+
+  const pairs = [
+    { id: 'ouro', pair: ['ouro', 'ouro2'] },
+    { id: 'ferro', pair: ['ferro', 'ferro2'] },
+    { id: 'cesio', pair: ['cesio', 'cesio2'] },
+    { id: 'litio', pair: ['litio', 'litio2'] },
+    { id: 'hidrogenio', pair: ['hidrogenio', 'hidrogenio2'] },
+    { id: 'sodio', pair: ['sodio', 'sodio2'] },
+    { id: 'uranio', pair: ['uranio', 'uranio2'] },
+    { id: 'aluminio', pair: ['aluminio', 'aluminio2'] },
+    { id: 'galio', pair: ['galio', 'galio2'] },
+    { id: 'boro', pair: ['boro', 'boro2'] }
+  ];
+
+  const charactersList = pairs.flatMap(p => p.pair);
+  const getBaseId = (name) => name.replace(/[0-9]/g, '');
+
+  let firstCard = '';
+  let secondCard = '';
+  let loop;
+  let attemptCount = 0;
+  let playerName = '';
+  let playerTime = 0;
+
+  // 🎵 SONS
   const soundStart = new Audio('./sounds/start.mp3');
   const soundFlip = new Audio('./sounds/flip.mp3');
   const soundMatch = new Audio('./sounds/match.mp3');
   const soundMismatch = new Audio('./sounds/mismatch.mp3');
   const soundWin = new Audio('./sounds/win.mp3');
 
-  // ...restante do código...
+  const createElement = (tag, className) => {
+    const element = document.createElement(tag);
+    element.className = className;
+    return element;
+  };
 
   const checkEndGame = () => {
     const disabledCards = document.querySelectorAll('.disabled-card');
     if (disabledCards.length === charactersList.length) {
       clearInterval(loop);
-      soundWin.play();
+      soundWin.play(); // 🏁 Som de vitória
       setTimeout(() => {
-        const again = confirm(`Parabéns, ${spanPlayer.innerHTML}! Seu tempo foi de ${timer.innerHTML} segundos.\nDeseja jogar novamente?`);
+        const again = confirm(`Parabéns, ${spanPlayer.innerHTML}! Seu tempo foi de ${timer.innerHTML} segundos e você fez ${attemptCount} tentativas.\nDeseja jogar novamente?`);
         if (again) location.reload();
       }, 500);
+      saveToRanking();
     }
   };
 
@@ -218,14 +257,14 @@
     const secondCharacter = getBaseId(secondCard.getAttribute('data-character'));
 
     if (firstCharacter === secondCharacter) {
-      soundMatch.play();
+      soundMatch.play(); // ✅ Som de acerto
       firstCard.firstChild.classList.add('disabled-card');
       secondCard.firstChild.classList.add('disabled-card');
       firstCard = '';
       secondCard = '';
       checkEndGame();
     } else {
-      soundMismatch.play();
+      soundMismatch.play(); // ❌ Som de erro
       setTimeout(() => {
         firstCard.classList.remove('reveal-card');
         secondCard.classList.remove('reveal-card');
@@ -238,7 +277,8 @@
   const revealCard = ({ target }) => {
     if (target.parentNode.classList.contains('reveal-card') || secondCard) return;
     target.parentNode.classList.add('reveal-card');
-    soundFlip.play();
+
+    soundFlip.play(); // 🔄 Som de virar carta
 
     if (!firstCard) {
       firstCard = target.parentNode;
@@ -246,188 +286,91 @@
       secondCard = target.parentNode;
       checkCards();
     }
+
+    attemptCount++;
+    attempts.innerHTML = attemptCount;
+  };
+
+  const createCard = (character) => {
+    const card = createElement('div', 'card');
+    const front = createElement('div', 'face front');
+    const back = createElement('div', 'face back');
+
+    front.style.backgroundImage = `url('./images/${character}.png')`;
+
+    card.appendChild(front);
+    card.appendChild(back);
+
+    card.setAttribute('data-character', character);
+    card.addEventListener('click', revealCard);
+
+    return card;
+  };
+
+  const loadGame = () => {
+    const shuffled = charactersList.sort(() => Math.random() - 0.5);
+    grid.innerHTML = '';
+
+    shuffled.forEach(character => {
+      const card = createCard(character);
+      grid.appendChild(card);
+    });
+
+    const allCards = document.querySelectorAll('.card');
+    allCards.forEach(card => card.classList.add('reveal-card'));
+
+    setTimeout(() => {
+      allCards.forEach(card => card.classList.remove('reveal-card'));
+
+      setTimeout(() => {
+        allCards.forEach((card, index) => {
+          setTimeout(() => {
+            card.classList.add('shuffle-effect');
+            setTimeout(() => card.classList.remove('shuffle-effect'), 600);
+          }, index * 20);
+        });
+
+        const shuffledAgain = Array.from(allCards).sort(() => Math.random() - 0.5);
+        shuffledAgain.forEach(card => grid.appendChild(card));
+
+      }, 300);
+
+    }, 1000);
+  };
+
+  const startTimer = () => {
+    let time = 0;
+    loop = setInterval(() => {
+      timer.innerHTML = ++time;
+      playerTime = time;
+    }, 1000);
+  };
+
+  const loadRanking = () => {
+    const ranking = JSON.parse(localStorage.getItem('ranking')) || [];
+    rankingList.innerHTML = ranking
+      .sort((a, b) => a.time - b.time)
+      .map((player, index) => `<li>${index + 1}. ${player.name} - ${player.time}s</li>`)
+      .join('');
+  };
+
+  const saveToRanking = () => {
+    const ranking = JSON.parse(localStorage.getItem('ranking')) || [];
+    ranking.push({ name: playerName, time: playerTime });
+    localStorage.setItem('ranking', JSON.stringify(ranking));
+    loadRanking();
   };
 
   startButton.addEventListener('click', () => {
-    const name = inputName.value.trim();
-    if (!name) return alert("Digite seu nome!");
-    spanPlayer.innerHTML = name;
+    playerName = inputName.value.trim();
+    if (!playerName) return alert("Digite seu nome!");
+    spanPlayer.innerHTML = playerName;
     startScreen.style.display = 'none';
     main.style.display = 'flex';
-    soundStart.play();
+    soundStart.play(); // ▶️ Som ao iniciar
     startTimer();
     loadGame();
   });
-    const startScreen = document.querySelector('.start-screen');
-    const startButton = document.querySelector('.start-button');
-    const inputName = document.querySelector('.input-name');
-    const main = document.querySelector('main');
-    const spanPlayer = document.querySelector('.player');
-    const timer = document.querySelector('.timer');
-    const grid = document.querySelector('.grid');
-    const attempts = document.querySelector('.attempts');
-    const rankingList = document.getElementById('ranking-list');
 
-    const pairs = [
-      { id: 'ouro', pair: ['ouro', 'ouro2'] },
-      { id: 'ferro', pair: ['ferro', 'ferro2'] },
-      { id: 'cesio', pair: ['cesio', 'cesio2'] },
-      { id: 'litio', pair: ['litio', 'litio2'] },
-      { id: 'hidrogenio', pair: ['hidrogenio', 'hidrogenio2'] },
-      { id: 'sodio', pair: ['sodio', 'sodio2'] },
-      { id: 'uranio', pair: ['uranio', 'uranio2'] },
-      { id: 'aluminio', pair: ['aluminio', 'aluminio2'] },
-      { id: 'galio', pair: ['galio', 'galio2'] },
-      { id: 'boro', pair: ['boro', 'boro2'] }
-    ];
-
-    const charactersList = pairs.flatMap(p => p.pair);
-    const getBaseId = (name) => name.replace(/[0-9]/g, '');
-
-    let firstCard = '';
-    let secondCard = '';
-    let loop;
-    let attemptCount = 0;
-    let playerName = '';
-    let playerTime = 0;
-
-    const createElement = (tag, className) => {
-      const element = document.createElement(tag);
-      element.className = className;
-      return element;
-    };
-
-    const checkEndGame = () => {
-      const disabledCards = document.querySelectorAll('.disabled-card');
-      if (disabledCards.length === charactersList.length) {
-        clearInterval(loop);
-        setTimeout(() => {
-          const again = confirm(`Parabéns, ${spanPlayer.innerHTML}! Seu tempo foi de ${timer.innerHTML} segundos e você fez ${attemptCount} tentativas.\nDeseja jogar novamente?`);
-          if (again) location.reload();
-        }, 500);
-
-        // Salvar o tempo e nome no ranking
-        saveToRanking();
-      }
-    };
-
-    const checkCards = () => {
-      const firstCharacter = getBaseId(firstCard.getAttribute('data-character'));
-      const secondCharacter = getBaseId(secondCard.getAttribute('data-character'));
-
-      if (firstCharacter === secondCharacter) {
-        firstCard.firstChild.classList.add('disabled-card');
-        secondCard.firstChild.classList.add('disabled-card');
-        firstCard = '';
-        secondCard = '';
-        checkEndGame();
-      } else {
-        setTimeout(() => {
-          firstCard.classList.remove('reveal-card');
-          secondCard.classList.remove('reveal-card');
-          firstCard = '';
-          secondCard = '';
-        }, 600);
-      }
-    };
-
-    const revealCard = ({ target }) => {
-      if (target.parentNode.classList.contains('reveal-card') || secondCard) return;
-      target.parentNode.classList.add('reveal-card');
-      if (!firstCard) {
-        firstCard = target.parentNode;
-      } else {
-        secondCard = target.parentNode;
-        checkCards();
-      }
-
-      attemptCount++;
-      attempts.innerHTML = attemptCount;
-    };
-
-    const createCard = (character) => {
-      const card = createElement('div', 'card');
-      const front = createElement('div', 'face front');
-      const back = createElement('div', 'face back');
-
-      front.style.backgroundImage = `url('./images/${character}.png')`;
-
-      card.appendChild(front);
-      card.appendChild(back);
-
-      card.setAttribute('data-character', character);
-      card.addEventListener('click', revealCard);
-
-      return card;
-    };
-
-    const loadGame = () => {
-      const shuffled = charactersList.sort(() => Math.random() - 0.5);
-      grid.innerHTML = '';
-
-      shuffled.forEach(character => {
-        const card = createCard(character);
-        grid.appendChild(card);
-      });
-
-      const allCards = document.querySelectorAll('.card');
-
-      allCards.forEach(card => card.classList.add('reveal-card'));
-
-      setTimeout(() => {
-        allCards.forEach(card => card.classList.remove('reveal-card'));
-
-        setTimeout(() => {
-          allCards.forEach((card, index) => {
-            setTimeout(() => {
-              card.classList.add('shuffle-effect');
-              setTimeout(() => card.classList.remove('shuffle-effect'), 600);
-            }, index * 20);
-          });
-
-          const shuffledAgain = Array.from(allCards).sort(() => Math.random() - 0.5);
-          shuffledAgain.forEach(card => grid.appendChild(card));
-
-        }, 300);
-
-      }, 1000);
-    };
-
-    const startTimer = () => {
-      let time = 0;
-      loop = setInterval(() => {
-        timer.innerHTML = ++time;
-        playerTime = time; // Armazenando o tempo final
-      }, 1000);
-    };
-
-    const loadRanking = () => {
-      const ranking = JSON.parse(localStorage.getItem('ranking')) || [];
-      rankingList.innerHTML = ranking
-        .sort((a, b) => a.time - b.time)
-        .map((player, index) => `<li>${index + 1}. ${player.name} - ${player.time}s</li>`)
-        .join('');
-    };
-
-    const saveToRanking = () => {
-      const ranking = JSON.parse(localStorage.getItem('ranking')) || [];
-      ranking.push({ name: playerName, time: playerTime });
-      localStorage.setItem('ranking', JSON.stringify(ranking));
-      loadRanking();
-    };
-
-    startButton.addEventListener('click', () => {
-      playerName = inputName.value.trim();
-      if (!playerName) return alert("Digite seu nome!");
-      spanPlayer.innerHTML = playerName;
-      startScreen.style.display = 'none';
-      main.style.display = 'flex';
-      startTimer();
-      loadGame();
-    });
-
-    window.addEventListener('load', loadRanking);
-  </script>
-</body>
-</html>
-
+  window.addEventListener('load', loadRanking);
+</script>
