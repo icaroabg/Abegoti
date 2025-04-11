@@ -139,6 +139,30 @@
         grid-template-columns: repeat(4, 1fr);
       }
     }
+
+    .ranking {
+      margin-top: 30px;
+      background-color: rgba(255, 255, 255, 0.8);
+      padding: 20px;
+      border-radius: 10px;
+      width: 100%;
+      max-width: 600px;
+    }
+
+    .ranking h2 {
+      margin-bottom: 10px;
+      font-size: 1.5em;
+    }
+
+    .ranking ul {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    .ranking li {
+      margin-bottom: 10px;
+      font-size: 1.2em;
+    }
   </style>
 </head>
 <body>
@@ -154,9 +178,17 @@
     <header>
       <span class="player">Jogador</span>
       <span>Tempo: <span class="timer">0</span>s</span>
+      <span>Tentativas: <span class="attempts">0</span></span>
     </header>
     <div class="grid"></div>
   </main>
+
+  <div class="ranking">
+    <h2>Ranking Global</h2>
+    <ul id="ranking-list">
+      <!-- Ranking será exibido aqui -->
+    </ul>
+  </div>
 
   <script>
     const startScreen = document.querySelector('.start-screen');
@@ -166,6 +198,8 @@
     const spanPlayer = document.querySelector('.player');
     const timer = document.querySelector('.timer');
     const grid = document.querySelector('.grid');
+    const attempts = document.querySelector('.attempts');
+    const rankingList = document.getElementById('ranking-list');
 
     const pairs = [
       { id: 'ouro', pair: ['ouro', 'ouro2'] },
@@ -186,6 +220,9 @@
     let firstCard = '';
     let secondCard = '';
     let loop;
+    let attemptCount = 0;
+    let playerName = '';
+    let playerTime = 0;
 
     const createElement = (tag, className) => {
       const element = document.createElement(tag);
@@ -198,9 +235,12 @@
       if (disabledCards.length === charactersList.length) {
         clearInterval(loop);
         setTimeout(() => {
-          const again = confirm(`Parabéns, ${spanPlayer.innerHTML}! Seu tempo foi de ${timer.innerHTML} segundos.\nDeseja jogar novamente?`);
+          const again = confirm(`Parabéns, ${spanPlayer.innerHTML}! Seu tempo foi de ${timer.innerHTML} segundos e você fez ${attemptCount} tentativas.\nDeseja jogar novamente?`);
           if (again) location.reload();
         }, 500);
+
+        // Salvar o tempo e nome no ranking
+        saveToRanking();
       }
     };
 
@@ -233,6 +273,9 @@
         secondCard = target.parentNode;
         checkCards();
       }
+
+      attemptCount++;
+      attempts.innerHTML = attemptCount;
     };
 
     const createCard = (character) => {
@@ -262,13 +305,11 @@
 
       const allCards = document.querySelectorAll('.card');
 
-      // Mostrar todas as cartas por 2 segundos
       allCards.forEach(card => card.classList.add('reveal-card'));
 
       setTimeout(() => {
         allCards.forEach(card => card.classList.remove('reveal-card'));
 
-        // Animação de embaralhamento visual
         setTimeout(() => {
           allCards.forEach((card, index) => {
             setTimeout(() => {
@@ -277,7 +318,6 @@
             }, index * 20);
           });
 
-          // Reordena cartas no DOM
           const shuffledAgain = Array.from(allCards).sort(() => Math.random() - 0.5);
           shuffledAgain.forEach(card => grid.appendChild(card));
 
@@ -290,18 +330,37 @@
       let time = 0;
       loop = setInterval(() => {
         timer.innerHTML = ++time;
+        playerTime = time; // Armazenando o tempo final
       }, 1000);
     };
 
+    const loadRanking = () => {
+      const ranking = JSON.parse(localStorage.getItem('ranking')) || [];
+      rankingList.innerHTML = ranking
+        .sort((a, b) => a.time - b.time)
+        .map((player, index) => `<li>${index + 1}. ${player.name} - ${player.time}s</li>`)
+        .join('');
+    };
+
+    const saveToRanking = () => {
+      const ranking = JSON.parse(localStorage.getItem('ranking')) || [];
+      ranking.push({ name: playerName, time: playerTime });
+      localStorage.setItem('ranking', JSON.stringify(ranking));
+      loadRanking();
+    };
+
     startButton.addEventListener('click', () => {
-      const name = inputName.value.trim();
-      if (!name) return alert("Digite seu nome!");
-      spanPlayer.innerHTML = name;
+      playerName = inputName.value.trim();
+      if (!playerName) return alert("Digite seu nome!");
+      spanPlayer.innerHTML = playerName;
       startScreen.style.display = 'none';
       main.style.display = 'flex';
       startTimer();
       loadGame();
     });
+
+    window.addEventListener('load', loadRanking);
   </script>
 </body>
 </html>
+
