@@ -168,7 +168,7 @@
 <body>
     <div class="game-container">
     <!-- Adiciona o botão para ligar/desligar música -->
-    <button id="music-toggle-btn">Desligar Música</button>
+    <button id="music-toggle-btn">Ligar Música</button>
     
     <!-- Área do jogo -->
     <div id="game-board">
@@ -390,7 +390,7 @@ const musicToggleButton = document.getElementById('music-toggle-btn');
 const backgroundMusic = document.getElementById('background-music');
 
 // Define o estado inicial da música (desligada)
-let isMusicOn = true;
+let isMusicOn = false;
 
 // Função para alternar a música
 function toggleMusic() {
