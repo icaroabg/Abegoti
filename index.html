@@ -181,6 +181,17 @@
       cursor: pointer;
     }
 
+    .card.shuffle-effect {
+  animation: shuffle-spin 0.6s ease-in-out;
+}
+
+@keyframes shuffle-spin {
+  0% { transform: rotateY(0deg); }
+  50% { transform: rotateY(180deg); }
+  100% { transform: rotateY(0deg); }
+}
+
+
     @media screen and (max-width: 768px) {
       .grid {
         grid-template-columns: repeat(4, 1fr);
@@ -331,6 +342,41 @@
       shuffled.forEach(character => grid.appendChild(createCard(character)));
     };
 
+const loadGame = () => {
+  const shuffled = charactersList.sort(() => Math.random() - 0.5);
+  grid.innerHTML = ''; // limpa grid
+
+  shuffled.forEach(character => {
+    const card = createCard(character);
+    grid.appendChild(card);
+  });
+
+  const allCards = document.querySelectorAll('.card');
+
+  // Mostrar todas as cartas inicialmente
+  allCards.forEach(card => card.classList.add('reveal-card'));
+
+  // Após 2s, esconder e embaralhar visualmente
+  setTimeout(() => {
+    allCards.forEach(card => card.classList.remove('reveal-card'));
+
+    // Adiciona efeito visual de embaralhamento
+    setTimeout(() => {
+      allCards.forEach(card => {
+        card.classList.add('shuffle-effect');
+        setTimeout(() => card.classList.remove('shuffle-effect'), 600);
+      });
+
+      // Embaralha novamente e reordena no DOM pra parecer bem visível
+      const shuffledAgain = Array.from(allCards).sort(() => Math.random() - 0.5);
+      shuffledAgain.forEach(card => grid.appendChild(card));
+
+    }, 200); // pequena pausa antes do "shuffle" visual
+
+  }, 1450); // tempo de exibição inicial
+};
+
+    
     const startTimer = () => {
       let time = 0;
       loop = setInterval(() => {
