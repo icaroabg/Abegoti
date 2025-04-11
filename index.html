@@ -166,6 +166,20 @@
   </style>
 </head>
 <body>
+   <div class="game-container">
+    <!-- Adiciona o botão para ligar/desligar música -->
+    <button id="music-toggle-btn">Ativar Música</button>
+    
+    <!-- Área do jogo -->
+    <div id="game-board">
+      <!-- Seu conteúdo do jogo vai aqui -->
+    </div>
+    
+    <audio id="background-music" loop>
+      <source src="Antoine Dufour - Talk (Coldplay).mp3" type="audio/mpeg">
+      Seu navegador não suporta o elemento de áudio.
+    </audio>
+  </div>
 
   <div class="start-screen">
     <h2>Digite seu nome:</h2>
@@ -371,6 +385,27 @@
     startTimer();
     loadGame();
   });
+// Seleciona o botão e o elemento de áudio
+const musicToggleButton = document.getElementById('music-toggle-btn');
+const backgroundMusic = document.getElementById('background-music');
+
+// Define o estado inicial da música (desligada)
+let isMusicOn = false;
+
+// Função para alternar a música
+function toggleMusic() {
+  if (isMusicOn) {
+    backgroundMusic.pause();
+    musicToggleButton.textContent = 'Ativar Música';
+  } else {
+    backgroundMusic.play();
+    musicToggleButton.textContent = 'Desativar Música';
+  }
+  isMusicOn = !isMusicOn;  // Alterna o estado da música
+}
+
+// Adiciona o evento de clique no botão
+musicToggleButton.addEventListener('click', toggleMusic);
 
   window.addEventListener('load', loadRanking);
 </script>
