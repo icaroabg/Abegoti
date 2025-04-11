@@ -166,14 +166,17 @@
   </style>
 </head>
 <body>
-     <div class="game-container">
-    <!-- Barra de volume -->
-    <label for="volume-control">Volume: </label>
-    <input type="range" id="volume-control" min="0" max="1" step="0.01" value="1">
+    <div class="game-container">
+    <!-- Adiciona o botão para ligar/desligar música -->
+    <button id="music-toggle-btn">Ativar Música</button>
     
-    <!-- Música de fundo -->
+    <!-- Área do jogo -->
+    <div id="game-board">
+      <!-- Seu conteúdo do jogo vai aqui -->
+    </div>
+    
     <audio id="background-music" loop>
-      <source src="Antoine Dufour - Talk (Coldplay).mp3" type="audio/mpeg">
+      <source src="sua-musica-calma.mp3" type="audio/mpeg">
       Seu navegador não suporta o elemento de áudio.
     </audio>
   </div>
@@ -387,7 +390,7 @@ const musicToggleButton = document.getElementById('music-toggle-btn');
 const backgroundMusic = document.getElementById('background-music');
 
 // Define o estado inicial da música (desligada)
-let isMusicOn = false;
+let isMusicOn = true;
 
 // Função para alternar a música
 function toggleMusic() {
@@ -400,23 +403,7 @@ function toggleMusic() {
   }
   isMusicOn = !isMusicOn;  // Alterna o estado da música
 }
-// Seleciona o controle de volume e o elemento de áudio
-const volumeControl = document.getElementById('volume-control');
-const backgroundMusic = document.getElementById('background-music');
 
-// Função para ajustar o volume com o controle deslizante
-function adjustVolume() {
-  backgroundMusic.volume = volumeControl.value;
-}
-
-// Adiciona o evento de alteração no controle de volume
-volumeControl.addEventListener('input', adjustVolume);
-
-// Inicializa o volume para o valor da barra (1)
-backgroundMusic.volume = volumeControl.value;
-
-// Reproduz a música de fundo (pode ser ajustado para reproduzir quando desejar)
-backgroundMusic.play();
 // Adiciona o evento de clique no botão
 musicToggleButton.addEventListener('click', toggleMusic);
 
