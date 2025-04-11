@@ -28,83 +28,83 @@
 
     .start-screen {
       background: #fff;
-      padding: 30px 20px;
+      padding: 30px;
       border-radius: 15px;
       text-align: center;
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
-      width: 100%;
-      max-width: 350px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
     }
 
     .start-screen h2 {
       margin-bottom: 20px;
-      font-size: 14px;
+      font-size: 1em;
       color: #05186d;
     }
 
     .start-screen input {
-      padding: 10px;
-      font-size: 12px;
+      padding: 12px;
+      font-size: 14px;
       border-radius: 8px;
       border: 2px solid #05186d;
-      width: 100%;
+      width: 90%;
       margin-bottom: 20px;
+      outline: none;
     }
 
     .start-screen button {
-      padding: 10px 25px;
-      font-size: 12px;
+      padding: 12px 25px;
+      font-size: 14px;
+      cursor: pointer;
       border-radius: 8px;
       background-color: #05186d;
       color: white;
       border: none;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-
-    .start-screen button:hover {
-      background-color: #0d2fa3;
     }
 
     main {
       display: none;
       flex-direction: column;
-      align-items: center;
       width: 100%;
+      align-items: center;
+      justify-content: center;
+      padding: 20px 0;
     }
 
     header {
       display: flex;
-      justify-content: space-between;
-      background-color: rgba(255, 255, 255, 0.85);
-      font-size: 10px;
+      align-items: center;
+      justify-content: space-around;
+      background-color: rgba(255, 255, 255, 0.8);
+      font-size: 1em;
       width: 100%;
-      max-width: 350px;
-      padding: 15px;
-      margin-bottom: 10px;
-      border-radius: 8px;
+      max-width: 800px;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 5px;
     }
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(5, 1fr);
       gap: 10px;
-      max-width: 350px;
       width: 100%;
+      max-width: 900px;
     }
 
     .card {
+      aspect-ratio: 3/4;
       width: 100%;
-      aspect-ratio: 3 / 4;
+      border-radius: 5px;
       position: relative;
       transform-style: preserve-3d;
-      transition: transform 0.4s ease;
+      transition: transform 0.5s;
+      cursor: pointer;
     }
 
     .face {
       width: 100%;
       height: 100%;
       position: absolute;
+      backface-visibility: hidden;
       background-size: cover;
       background-position: center;
       border: 4px solid #05186d;
@@ -117,7 +117,6 @@
 
     .back {
       background-image: url('./images/back.png');
-      backface-visibility: hidden;
     }
 
     .reveal-card {
@@ -125,37 +124,35 @@
     }
 
     .disabled-card {
-      filter: grayscale(1);
-      opacity: 0.4;
+      filter: saturate(0);
+      opacity: 0.5;
     }
 
     .ranking {
-      background: rgba(255, 255, 255, 0.95);
-      padding: 15px;
-      border-radius: 10px;
       margin-top: 20px;
-      max-width: 350px;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 20px;
+      border-radius: 15px;
+      max-width: 600px;
       width: 100%;
     }
 
     .ranking h2 {
-      font-size: 14px;
-      color: #05186d;
       margin-bottom: 10px;
-      text-align: center;
+      font-size: 1.2em;
+      color: #05186d;
     }
 
     .ranking ul {
       list-style: none;
       padding: 0;
-      font-size: 10px;
     }
 
     .ranking li {
-      padding: 5px 10px;
-      margin-bottom: 5px;
-      background: #e6f0ff;
-      border-radius: 6px;
+      margin-bottom: 8px;
+      padding: 8px;
+      background-color: #e6f0ff;
+      border-radius: 8px;
       display: flex;
       justify-content: space-between;
     }
@@ -173,26 +170,34 @@
     }
 
     #music-toggle-btn {
-      margin-bottom: 15px;
-      font-size: 10px;
-      padding: 8px 20px;
-      border-radius: 8px;
-      background: #05186d;
-      color: white;
+      margin: 10px;
+      padding: 10px 20px;
+      font-size: 12px;
+      background-color: #05186d;
+      color: #fff;
       border: none;
+      border-radius: 8px;
       cursor: pointer;
+    }
+
+    @media screen and (max-width: 768px) {
+      .grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+
+      .start-screen, .ranking, header {
+        font-size: 0.8em;
+      }
     }
   </style>
 </head>
 <body>
   <button id="music-toggle-btn">Ligar Música</button>
-  <audio id="background-music" loop>
-    <source src="Antoine Dufour - Talk (Coldplay).mp3" type="audio/mpeg">
-  </audio>
 
   <div class="start-screen">
     <h2>Digite seu nome:</h2>
     <input type="text" class="input-name" placeholder="Seu nome" />
+    <br />
     <button class="start-button">Jogar</button>
   </div>
 
@@ -210,15 +215,19 @@
     <ul id="ranking-list"></ul>
   </div>
 
+  <audio id="background-music" loop>
+    <source src="Antoine Dufour - Talk (Coldplay).mp3" type="audio/mpeg">
+  </audio>
+
   <script>
-    const startScreen = document.querySelector('.start-screen');
     const startButton = document.querySelector('.start-button');
     const inputName = document.querySelector('.input-name');
+    const startScreen = document.querySelector('.start-screen');
     const main = document.querySelector('main');
     const spanPlayer = document.querySelector('.player');
     const timer = document.querySelector('.timer');
-    const grid = document.querySelector('.grid');
     const attempts = document.querySelector('.attempts');
+    const grid = document.querySelector('.grid');
     const rankingList = document.getElementById('ranking-list');
 
     const pairs = [
@@ -237,12 +246,8 @@
     const charactersList = pairs.flatMap(p => p.pair);
     const getBaseId = (name) => name.replace(/[0-9]/g, '');
 
-    let firstCard = '';
-    let secondCard = '';
-    let loop;
-    let attemptCount = 0;
-    let playerName = '';
-    let playerTime = 0;
+    let firstCard = '', secondCard = '', loop;
+    let attemptCount = 0, playerTime = 0, playerName = '';
 
     const soundStart = new Audio('./sounds/start.mp3');
     const soundFlip = new Audio('./sounds/flip.mp3');
@@ -262,7 +267,7 @@
         clearInterval(loop);
         soundWin.play();
         setTimeout(() => {
-          const again = confirm(`Parabéns, ${spanPlayer.innerHTML}! Tempo: ${timer.innerHTML}s | Tentativas: ${attemptCount}\nJogar novamente?`);
+          const again = confirm(`Parabéns, ${spanPlayer.innerHTML}! Seu tempo foi de ${timer.innerHTML}s com ${attemptCount} tentativas.\nDeseja jogar novamente?`);
           if (again) location.reload();
         }, 500);
         saveToRanking();
@@ -287,7 +292,7 @@
           secondCard.classList.remove('reveal-card');
           firstCard = '';
           secondCard = '';
-        }, 600);
+        }, 700);
       }
     };
 
@@ -295,14 +300,15 @@
       if (target.parentNode.classList.contains('reveal-card') || secondCard) return;
       target.parentNode.classList.add('reveal-card');
       soundFlip.play();
+
       if (!firstCard) {
         firstCard = target.parentNode;
       } else {
         secondCard = target.parentNode;
         checkCards();
       }
-      attemptCount++;
-      attempts.innerHTML = attemptCount;
+
+      attempts.textContent = ++attemptCount;
     };
 
     const createCard = (character) => {
@@ -310,6 +316,7 @@
       const front = createElement('div', 'face front');
       const back = createElement('div', 'face back');
       front.style.backgroundImage = `url('./images/${character}.png')`;
+
       card.appendChild(front);
       card.appendChild(back);
       card.setAttribute('data-character', character);
@@ -326,7 +333,7 @@
     const startTimer = () => {
       let time = 0;
       loop = setInterval(() => {
-        timer.innerHTML = ++time;
+        timer.textContent = ++time;
         playerTime = time;
       }, 1000);
     };
@@ -350,7 +357,7 @@
     startButton.addEventListener('click', () => {
       playerName = inputName.value.trim();
       if (!playerName) return alert("Digite seu nome!");
-      spanPlayer.innerHTML = playerName;
+      spanPlayer.textContent = playerName;
       startScreen.style.display = 'none';
       main.style.display = 'flex';
       soundStart.play();
@@ -377,3 +384,4 @@
   </script>
 </body>
 </html>
+
