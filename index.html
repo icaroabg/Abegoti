@@ -191,6 +191,73 @@
   </div>
 
   <script>
+
+      // Sons
+  const soundStart = new Audio('./sounds/start.mp3');
+  const soundFlip = new Audio('./sounds/flip.mp3');
+  const soundMatch = new Audio('./sounds/match.mp3');
+  const soundMismatch = new Audio('./sounds/mismatch.mp3');
+  const soundWin = new Audio('./sounds/win.mp3');
+
+  // ...restante do código...
+
+  const checkEndGame = () => {
+    const disabledCards = document.querySelectorAll('.disabled-card');
+    if (disabledCards.length === charactersList.length) {
+      clearInterval(loop);
+      soundWin.play();
+      setTimeout(() => {
+        const again = confirm(`Parabéns, ${spanPlayer.innerHTML}! Seu tempo foi de ${timer.innerHTML} segundos.\nDeseja jogar novamente?`);
+        if (again) location.reload();
+      }, 500);
+    }
+  };
+
+  const checkCards = () => {
+    const firstCharacter = getBaseId(firstCard.getAttribute('data-character'));
+    const secondCharacter = getBaseId(secondCard.getAttribute('data-character'));
+
+    if (firstCharacter === secondCharacter) {
+      soundMatch.play();
+      firstCard.firstChild.classList.add('disabled-card');
+      secondCard.firstChild.classList.add('disabled-card');
+      firstCard = '';
+      secondCard = '';
+      checkEndGame();
+    } else {
+      soundMismatch.play();
+      setTimeout(() => {
+        firstCard.classList.remove('reveal-card');
+        secondCard.classList.remove('reveal-card');
+        firstCard = '';
+        secondCard = '';
+      }, 600);
+    }
+  };
+
+  const revealCard = ({ target }) => {
+    if (target.parentNode.classList.contains('reveal-card') || secondCard) return;
+    target.parentNode.classList.add('reveal-card');
+    soundFlip.play();
+
+    if (!firstCard) {
+      firstCard = target.parentNode;
+    } else {
+      secondCard = target.parentNode;
+      checkCards();
+    }
+  };
+
+  startButton.addEventListener('click', () => {
+    const name = inputName.value.trim();
+    if (!name) return alert("Digite seu nome!");
+    spanPlayer.innerHTML = name;
+    startScreen.style.display = 'none';
+    main.style.display = 'flex';
+    soundStart.play();
+    startTimer();
+    loadGame();
+  });
     const startScreen = document.querySelector('.start-screen');
     const startButton = document.querySelector('.start-button');
     const inputName = document.querySelector('.input-name');
